@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attention Test</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    /* For title hover effect */
+    title:hover {
+        transform: scale(1.1); /* Enlarge title on hover */
+    }
+
+    /* For enlarging letters T and L on hover */
+    .letter:hover {
+        transform: scale(1.1); /* Enlarge all letters on hover */
+    }
+
+    .letter:hover:contains('T'), .letter:hover:contains('L') {
+        transform: scale(1.1); /* Enlarge letters T and L on hover */
+    }
+
+    #container {
+        display: flex;
+        justify-content: center;
+        position: relative; /* Adding relative positioning */
+    }
+    #image-container {
+        width: 300px;
+        height: 300px; /* Set container height to 300px */
+        position: relative;
+        border: 3px solid purple;
+        background-color: lightgrey;
+    }
+    .letter {
+        font-size: 16px;
+        border: 1px solid transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transform-origin: center;
+        position: absolute;
+        width: calc(100% / 6);
+        height: calc(100% / 6);
+        transition: transform 0.2s; /* Adding transition effect */
+    }
+    #center-dot {
+        width: 10px;
+        height: 10px; 
+        background-color: white;
+        border-radius: 50%;
+        position: absolute;
+        top: calc(50% - 5px); 
+        left: calc(50% - 5px); 
+        z-index: 1;
+    }
+    #center-lines {
+        position: absolute;
+        top: 0;
+        left: calc(50% - 0.5px); /* Adjust line position to center it */
+        width: 1px;
+        height: 300px;
+        background-color: white;
+        z-index: 1;
+    }
+    #center-lines-horizontal {
+        position: absolute;
+        top: calc(50% - 0.5px); /* Adjust line position to center it */
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background-color: white;
+        z-index: 1;
+    }
+    #score {
+        text-align: center;
+        margin-top: 20px;
+    }
+    #countdown {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 20px;
+        color: black; /* Default color is black */
+    }
+    button {
+        background-color: #4CAF50; /* Default background color */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 10px; /* Rounded corners */
+        transition: transform 0.2s; /* Adding transition effect */
+    }
+    button:hover {
+        background-color: #45a049; /* Background color on hover */
+        transform: scale(1.1); /* Scale button to 1.1 times original size on hover */
+    }
+
+    #buttons-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    #records {
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+    
+<div id="container">
+    <div id="center-dot"></div>
+    <div id="center-lines"></div>
+    <div id="center-lines-horizontal"></div>
+    <div id="image-container">
+        <!-- Letters will be generated here -->
+    </div>
+</div>
+
+<div id="score"></div>
+<div id="countdown">Countdown: 4</div>
+
+<div id="buttons-container">
+    <button onclick="restartTest()">Restart</button>
+    <button onclick="clearRecords()">Clear</button>
+</div>
+
+<div id="records"></div>
+
+<script>
+    var letters = [];
+var correctIndex;
+var score = 0;
+var currentRound = 0;
+var totalRounds = 25;
+var timer;
+var records = [];
+var lastClickTime = 0;
+var clickDelay = 150; // Delay in milliseconds (0.15 seconds)
+
+function startTest() {
+    clearTest();
+    generateImage();
+    var countdown = 4; // Initial countdown time
+    var countdownDiv = document.getElementById("countdown");
+    countdownDiv.innerText = "Countdown: " + countdown; // Update countdown display
+    timer = setTimeout(function() {
+        changeColor();
+    }, 4000); // Change color after 4 seconds
+    
+    // Start countdown
+    var countdownInterval = setInterval(function() {
+        countdown--; // Decrease countdown by 1
+        countdownDiv.innerText = "Countdown: " + countdown; // Update countdown display
+        if (countdown <= 0) {
+            clearInterval(countdownInterval); // Clear interval when countdown reaches 0
+        }
+    }, 1000); // Decrease by one every second
+}
+
+function restartTest() {
+    location.reload(); // Reload the page
+}
+
+function generateImage() {
+    var container = document.getElementById("image-container");
+    container.innerHTML = "";
+    correctIndex = Math.floor(Math.random() * 36); // 6x6 grid
+
+    for (var i = 0; i < 36; i++) {
+        var letter = i === correctIndex ? 'T' : 'L'; // 'T' for target letter, 'L' for others
+        letters.push(letter);
+
+        var div = document.createElement("div");
+        div.className = "letter";
+        div.innerText = letter;
+        div.style.transform = "rotate(" + Math.floor(Math.random() * 360) + "deg)"; // Random rotation
+        var row = Math.floor(i / 6);
+        var col = i % 6;
+        div.style.top = (row * (100 / 6)) + "%";
+        div.style.left = (col * (100 / 6)) + "%";
+        div.onclick = function() { checkAnswer(this); };
+        container.appendChild(div);
+    }
+}
+
+function changeColor() {
+    document.getElementById("image-container").style.backgroundColor = "black";
+    currentRound++; // Increase round count when container turns white
+    updateScore(); // Update score display
+    setTimeout(function() {
+        document.getElementById("image-container").style.backgroundColor = "lightgrey"; // Change background color to grey
+        startTest(); // Start next round after color change
+    }, 100);
+}
+
+function checkAnswer(element) {
+    var now = Date.now();
+    if (now - lastClickTime < clickDelay) {
+        return; // Ignore clicks that are too close together
+    }
+    lastClickTime = now;
+
+    increaseCurrentRound(); // Increase round count immediately upon click
+    var index = Array.from(element.parentNode.children).indexOf(element);
+    if (index === correctIndex) {
+        score++;
+    }
+    updateScore();
+
+    clearTimeout(timer); // Clear the timer
+    startTest(); // Start next round immediately after answer selection
+}
+
+function increaseCurrentRound() {
+    currentRound++;
+    if (currentRound >= totalRounds) {
+        endTest();
+    }
+}
+
+function updateScore() {
+    document.getElementById("score").innerText = "Round: " + currentRound + " / " + totalRounds + " - Score: " + score;
+}
+
+function clearTest() {
+    letters = [];
+    correctIndex = null;
+}
+
+function endTest() {
+    document.getElementById("score").innerText = "Final Score: " + score;
+    saveRecord(); // Save record when test ends
+    showRecords(); // Show records
+    score = 0; // Reset score for next use
+    currentRound = 0; // Reset round count for next use
+    updateScore(); // Update score display
+}
+
+function saveRecord() {
+    var record = {
+        time: new Date().toLocaleString(),
+        score: score
+    };
+    records.push(record);
+    localStorage.setItem("attentionTestRecords", JSON.stringify(records)); // Save records to local storage
+    score = 0; // Reset score after saving record
+    currentRound = 0; // Reset round count after saving record
+}
+
+function showRecords() {
+    var recordsDiv = document.getElementById("records");
+    recordsDiv.innerHTML = "";
+    var storedRecords = localStorage.getItem("attentionTestRecords");
+    if (storedRecords) {
+        records = JSON.parse(storedRecords);
+        records.forEach(function(record, index) {
+            var recordStr = "<p>" + (index + 1) + ". Time: " + record.time + ", Score: " + record.score + "</p>";
+            recordsDiv.innerHTML += recordStr;
+        });
+    }
+}
+
+function clearRecords() {
+    localStorage.removeItem("attentionTestRecords"); // Clear records from local storage
+    records = [];
+    document.getElementById("records").innerHTML = "";
+}
+
+updateScore(); // Initial score display
+showRecords(); // Show existing records
+startTest(); // Start the test initially
+
+</script>
+
+</body>
+</html>
