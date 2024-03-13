@@ -140,7 +140,8 @@
 var correctIndex;
 var score = 0;
 var currentRound = 0;
-var totalRounds = 5;
+var totalRounds = 5; // Initial total rounds
+var maxScore = 0; // Maximum score variable
 var timer;
 var records = [];
 var lastClickTime = 0;
@@ -222,7 +223,7 @@ function checkAnswer(element) {
 
 function increaseCurrentRound() {
     currentRound++;
-    if (currentRound >= totalRounds + 1) {
+    if (currentRound >= totalRounds) {
         endTest();
     }
 }
@@ -238,11 +239,19 @@ function clearTest() {
 
 function endTest() {
     document.getElementById("score").innerText = "Final Score: " + score;
+    updateMaxScore(); // Update maximum score
     saveRecord(); // Save record when test ends
     showRecords(); // Show records
     score = 0; // Reset score for next use
     currentRound = 0; // Reset round count for next use
     updateScore(); // Update score display
+}
+
+function updateMaxScore() {
+    if (score > maxScore) {
+        maxScore = score; // Update max score if current score is higher
+        totalRounds = currentRound; // Update total rounds to match max score
+    }
 }
 
 function saveRecord() {
