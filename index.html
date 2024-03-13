@@ -210,23 +210,28 @@ function checkAnswer(element) {
     }
     lastClickTime = now;
 
-    increaseCurrentRound(); // Increase round count immediately upon click
     var index = Array.from(element.parentNode.children).indexOf(element);
     if (index === correctIndex) {
-        score++;
+        score++; // Increment score if answer is correct
+        updateScore();
+        increaseCurrentRound();
+    } else {
+        increaseCurrentRound();
+        updateScore(); // Update score even if the answer is incorrect since we need to show the next round
     }
-    updateScore();
 
-    clearTimeout(timer); // Clear the timer
-    startTest(); // Start next round immediately after answer selection
+    if (currentRound < totalRounds) {
+        clearTimeout(timer); // Clear the timer
+        startTest(); // Start next round immediately after answer selection
+    } else {
+        endTest(); // If currentRound reached totalRounds, end the test
+    }
 }
 
 function increaseCurrentRound() {
-    currentRound++;
-    if (currentRound >= totalRounds) {
-        endTest();
-    }
+    currentRound++; // Increase round count immediately upon click
 }
+
 
 function updateScore() {
     document.getElementById("score").innerText = "Round: " + currentRound + " / " + totalRounds + " - Score: " + score;
@@ -238,13 +243,13 @@ function clearTest() {
 }
 
 function endTest() {
-    document.getElementById("score").innerText = "Final Score: " + score;
     updateMaxScore(); // Update maximum score
-    updateScore(); // Update score display
+    document.getElementById("score").innerText = "Final Score: " + score;
     saveRecord(); // Save record when test ends
     showRecords(); // Show records
     score = 0; // Reset score for next use
     currentRound = 0; // Reset round count for next use
+    updateScore(); // Update score display
 }
 
 function updateMaxScore() {
@@ -282,9 +287,9 @@ function clearRecords() {
     document.getElementById("records").innerHTML = "";
 }
 
-updateScore(); // Initial score display
-showRecords(); // Show existing records
-startTest(); // Start the test initially
+updateScore(); 
+showRecords(); 
+startTest(); 
 
 </script>
 
