@@ -250,10 +250,9 @@ function endTest() {
 function updateMaxScore() {
     if (score > maxScore) {
         maxScore = score; // Update max score if current score is higher
-        totalRounds = currentRound; // Update total rounds to match max score
     }
 }
-
+    
 function saveRecord() {
     var record = {
         time: new Date().toLocaleString(),
