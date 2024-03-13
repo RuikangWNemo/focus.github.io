@@ -240,33 +240,28 @@ function clearTest() {
 function endTest() {
     document.getElementById("score").innerText = "Final Score: " + score;
     updateMaxScore(); // Update maximum score
+    updateScore(); // Update score display
     saveRecord(); // Save record when test ends
     showRecords(); // Show records
     score = 0; // Reset score for next use
     currentRound = 0; // Reset round count for next use
-    updateScore(); // Update score display
 }
 
 function updateMaxScore() {
     if (score > maxScore) {
         maxScore = score; // Update max score if current score is higher
+        totalRounds = currentRound; // Update total rounds to match max score
     }
 }
-    
+
 function saveRecord() {
     var record = {
         time: new Date().toLocaleString(),
         score: score
     };
     records.push(record);
-    if (score === 5) {
-        maxScore = 5; // Ensure maximum score is 5 if the current score is 5
-    }
     localStorage.setItem("attentionTestRecords", JSON.stringify(records)); // Save records to local storage
-    score = 0; // Reset score after saving record
-    currentRound = 0; // Reset round count after saving record
 }
-    
 
 function showRecords() {
     var recordsDiv = document.getElementById("records");
