@@ -259,10 +259,14 @@ function saveRecord() {
         score: score
     };
     records.push(record);
+    if (score === 5) {
+        maxScore = 5; // Ensure maximum score is 5 if the current score is 5
+    }
     localStorage.setItem("attentionTestRecords", JSON.stringify(records)); // Save records to local storage
     score = 0; // Reset score after saving record
     currentRound = 0; // Reset round count after saving record
 }
+    
 
 function showRecords() {
     var recordsDiv = document.getElementById("records");
